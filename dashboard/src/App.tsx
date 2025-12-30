@@ -9,6 +9,7 @@ import {
   ProjectBreakdown,
   ConfigForm,
   DateRangePicker,
+  UserFilter,
 } from './components';
 import { GitLabService } from './services/gitlabService';
 import { generateMockData } from './services/mockData';
@@ -21,6 +22,7 @@ function App() {
   const [gitlabService, setGitlabService] = useState<GitLabService | null>(null);
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [activities, setActivities] = useState<UserActivity[]>([]);
+  const [selectedUserIds, setSelectedUserIds] = useState<number[]>([]);
   const [isDemo, setIsDemo] = useState(false);
   const [dateRange, setDateRange] = useState({
     since: subDays(new Date(), 30),
@@ -80,9 +82,25 @@ function App() {
     setGitlabService(null);
     setStats(null);
     setActivities([]);
+    setSelectedUserIds([]);
     setError(null);
     setIsDemo(false);
   };
+
+  // Filter activities and recalculate stats based on selected users
+  const filteredActivities =
+    selectedUserIds.length > 0
+      ? activities.filter((activity) => selectedUserIds.includes(activity.user.id))
+      : activities;
+
+  // Recalculate stats based on filtered activities
+  const filteredStats =
+    filteredActivities.length > 0 && filteredActivities.length !== activities.length
+      ? (() => {
+          const service = gitlabService || new GitLabService({ baseUrl: '', privateToken: '' });
+          return service.calculateStats(filteredActivities, dateRange.since, dateRange.until);
+        })()
+      : stats;
 
   if (!isConfigured) {
     return (
@@ -113,7 +131,14 @@ function App() {
             {isDemo ? 'Exit Demo' : 'Disconnect'}
           </button>
         </div>
-        <DateRangePicker onRangeChange={handleDateRangeChange} />
+        <div className="header-controls">
+          <UserFilter
+            allUsers={activities.map((a) => a.user)}
+            selectedUserIds={selectedUserIds}
+            onSelectionChange={setSelectedUserIds}
+          />
+          <DateRangePicker onRangeChange={handleDateRangeChange} />
+        </div>
       </header>
 
       <main className="app-main dashboard-view">
@@ -131,31 +156,31 @@ function App() {
           </div>
         )}
 
-        {stats && (
+        {filteredStats && (
           <>
             <section className="dashboard-section">
               <StatsCards
-                totalUsers={stats.totalUsers}
-                totalCommits={stats.totalCommits}
-                totalAdditions={stats.totalAdditions}
-                totalDeletions={stats.totalDeletions}
-                avgCommitsPerWorkday={stats.avgCommitsPerWorkday}
+                totalUsers={filteredStats.totalUsers}
+                totalCommits={filteredStats.totalCommits}
+                totalAdditions={filteredStats.totalAdditions}
+                totalDeletions={filteredStats.totalDeletions}
+                avgCommitsPerWorkday={filteredStats.avgCommitsPerWorkday}
               />
             </section>
 
             <section className="dashboard-section">
-              <TimelineChart commitsByDay={stats.commitsByDay} />
+              <TimelineChart commitsByDay={filteredStats.commitsByDay} />
             </section>
 
             <section className="dashboard-section grid-2">
-              <ContributorLeaderboard topContributors={stats.topContributors} />
-              <ProjectBreakdown projectBreakdown={stats.projectBreakdown} />
+              <ContributorLeaderboard topContributors={filteredStats.topContributors} />
+              <ProjectBreakdown projectBreakdown={filteredStats.projectBreakdown} />
             </section>
 
             <section className="dashboard-section">
               <ActivityHeatmap
-                commitsByDayOfWeek={stats.commitsByDayOfWeek}
-                commitsByHour={stats.commitsByHour}
+                commitsByDayOfWeek={filteredStats.commitsByDayOfWeek}
+                commitsByHour={filteredStats.commitsByHour}
               />
             </section>
 
@@ -171,7 +196,7 @@ function App() {
                     </tr>
                   </thead>
                   <tbody>
-                    {activities
+                    {filteredActivities
                       .sort((a, b) => b.totalCommits - a.totalCommits)
                       .slice(0, 20)
                       .map((activity) => (
