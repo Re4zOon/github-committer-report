@@ -39,7 +39,7 @@ export function UserFilter({ allUsers, selectedUserIds, onSelectionChange }: Use
     if (allUsers.length > 0 && selectedUserIds.length === 0) {
       onSelectionChange(allUsers.map((u) => u.id));
     }
-  }, [allUsers, selectedUserIds.length, onSelectionChange]);
+  }, [allUsers, selectedUserIds, onSelectionChange]);
 
   const selectedCount = selectedUserIds.length;
   const totalCount = allUsers.length;
@@ -78,7 +78,9 @@ export function UserFilter({ allUsers, selectedUserIds, onSelectionChange }: Use
                   checked={selectedUserIds.includes(user.id)}
                   onChange={() => handleToggleUser(user.id)}
                 />
-                <img src={user.avatar_url} alt={user.name} className="filter-avatar" />
+                <img src={user.avatar_url} alt={user.name} className="filter-avatar" onError={(e) => {
+                  e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=random`;
+                }} />
                 <div className="filter-user-info">
                   <div className="filter-user-name">{user.name}</div>
                   <div className="filter-user-username">@{user.username}</div>

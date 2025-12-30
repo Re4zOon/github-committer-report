@@ -94,13 +94,15 @@ function App() {
       : activities;
 
   // Recalculate stats based on filtered activities
-  const filteredStats =
-    filteredActivities.length > 0 && filteredActivities.length !== activities.length
-      ? (() => {
-          const service = gitlabService || new GitLabService({ baseUrl: '', privateToken: '' });
-          return service.calculateStats(filteredActivities, dateRange.since, dateRange.until);
-        })()
-      : stats;
+  const filteredStats = (() => {
+    if (filteredActivities.length === 0) return stats;
+    if (filteredActivities.length === activities.length) return stats;
+    
+    // For demo mode or when gitlabService is not available, create a temporary instance
+    // Note: calculateStats is a pure function that doesn't require service configuration
+    const service = gitlabService || new GitLabService({ baseUrl: '', privateToken: '' });
+    return service.calculateStats(filteredActivities, dateRange.since, dateRange.until);
+  })();
 
   if (!isConfigured) {
     return (
