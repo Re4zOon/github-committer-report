@@ -9,6 +9,9 @@ import type {
   DashboardStats,
 } from '../types/gitlab';
 
+// Maximum number of pages to fetch to prevent infinite loops
+const MAX_PAGES = 100;
+
 export class GitLabService {
   private client: AxiosInstance;
   private config: GitLabConfig;
@@ -30,7 +33,7 @@ export class GitLabService {
     const perPage = 100;
 
     try {
-      while (true) {
+      while (page <= MAX_PAGES) {
         let response;
         if (this.config.groupId) {
           // Get group members
@@ -65,7 +68,7 @@ export class GitLabService {
     const perPage = 100;
 
     try {
-      while (true) {
+      while (page <= MAX_PAGES) {
         const params: Record<string, unknown> = { page, per_page: perPage };
         if (after) params.after = after.toISOString().split('T')[0];
         if (before) params.before = before.toISOString().split('T')[0];
@@ -78,6 +81,7 @@ export class GitLabService {
         page++;
       }
     } catch (error) {
+      // Log error but continue - individual user failures shouldn't break the entire dashboard
       console.error(`Error fetching events for user ${userId}:`, error);
     }
 
@@ -95,7 +99,7 @@ export class GitLabService {
     const perPage = 100;
 
     try {
-      while (true) {
+      while (page <= MAX_PAGES) {
         const params: Record<string, unknown> = { page, per_page: perPage, with_stats: true };
         if (since) params.since = since.toISOString();
         if (until) params.until = until.toISOString();
@@ -110,6 +114,7 @@ export class GitLabService {
         page++;
       }
     } catch (error) {
+      // Log error but continue - individual project failures shouldn't break the entire dashboard
       console.error(`Error fetching commits for project ${projectId}:`, error);
     }
 
@@ -123,7 +128,7 @@ export class GitLabService {
     const perPage = 100;
 
     try {
-      while (true) {
+      while (page <= MAX_PAGES) {
         let response;
         if (this.config.groupId) {
           response = await this.client.get(`/groups/${this.config.groupId}/projects`, {
