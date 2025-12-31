@@ -25,7 +25,7 @@ describe('BackendApiService', () => {
       const config = {
         baseUrl: 'https://gitlab.com',
         privateToken: 'test-token',
-        groupId: 123,
+        groupId: '123',
       };
 
       await service.syncData(config);
