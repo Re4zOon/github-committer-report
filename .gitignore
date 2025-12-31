@@ -36,6 +36,11 @@ pnpm-debug.log*
 
 # Coverage
 coverage/
+.nyc_output/
+*.lcov
+
+# Test artifacts
+.vitest/
 
 # Database
 *.db

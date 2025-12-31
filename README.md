@@ -1,8 +1,15 @@
 # GitLab Activity Dashboard
 
+> 🦊 An interactive analytics dashboard for visualizing GitLab activity with powerful insights and beautiful charts.
+
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
+![Node](https://img.shields.io/badge/node-%3E%3D18-brightgreen.svg)
+![PostgreSQL](https://img.shields.io/badge/postgresql-%3E%3D14-blue.svg)
+![TypeScript](https://img.shields.io/badge/typescript-%5E5.0-blue.svg)
+
 An interactive dashboard for GitLab activity statistics with PostgreSQL data storage. Connect to your GitLab instance to visualize user activity, commits, and more - all data is persisted in a PostgreSQL database for reliable storage and fast querying.
 
-## Features
+## ✨ Features
 
 ### Core Features
 - **GitLab Integration**: Connect to any GitLab instance (gitlab.com or self-hosted) using a private token
@@ -33,116 +40,170 @@ An interactive dashboard for GitLab activity statistics with PostgreSQL data sto
 - **Dark Theme**: Modern dark theme optimized for readability
 - **Responsive Design**: Works on desktop and tablet devices
 - **Real-time Loading**: Loading indicators while fetching data
+- **Demo Mode**: Try the dashboard with sample data
 
-## Getting Started
+## 📸 Screenshots
 
-### Prerequisites
-- Node.js 18+ 
-- npm or yarn
-- PostgreSQL 14+ (or use Docker)
-- Docker and Docker Compose (optional, for easy setup)
-- GitLab private token with `read_api` scope
+_Dashboard with interactive charts and statistics_
 
-### Quick Start with Docker (Recommended)
+> **Note**: Screenshots will be added in a future update. For now, you can try the demo mode to see the dashboard in action!
 
-The easiest way to run the application with PostgreSQL is using Docker Compose:
+## 🎥 Demo
 
-1. **Clone the repository**
+Try the live demo mode to explore the dashboard without configuring GitLab:
+
+1. Visit the dashboard
+2. Click "🎮 Launch Demo Mode"
+3. Interact with charts and explore features
+
+## 📋 Table of Contents
+
+- [Quick Start](#-quick-start)
+- [Documentation](#-documentation)
+- [Running Tests](#-running-tests)
+- [Technology Stack](#-technology-stack)
+- [Contributing](#-contributing)
+- [License](#-license)
+
+## 🚀 Quick Start
+
+### Option 1: Docker (Recommended)
+
+The fastest way to get started. This will set up PostgreSQL, backend, and frontend automatically.
+
 ```bash
-git clone <repository-url>
+# Clone the repository
+git clone https://github.com/Re4zOon/github-committer-report.git
 cd github-committer-report
-```
 
-2. **Configure environment**
-```bash
-cp .env.example .env
-# Edit .env if you want to customize database credentials
-```
-
-3. **Start all services**
-```bash
+# Start all services
 docker-compose up -d
+
+# Access the dashboard
+# Open http://localhost:5173 in your browser
 ```
 
-This will start:
-- PostgreSQL database on port 5432
-- Backend API server on port 3001
-- Frontend dashboard on port 5173
+That's it! The dashboard is now running. 🎉
 
-4. **Access the dashboard**
+### Option 2: Manual Setup
 
-Open http://localhost:5173 in your browser.
+For development or customization:
 
-### Manual Installation
+1. **Install Prerequisites**
+   - Node.js 18+
+   - PostgreSQL 14+
 
-If you prefer to run services manually:
+2. **Setup Database**
+   ```bash
+   createdb gitlab_dashboard
+   ```
 
-#### 1. Setup PostgreSQL
+3. **Install and Run Backend**
+   ```bash
+   cd backend
+   npm install
+   npm run dev
+   ```
 
-Install PostgreSQL and create a database:
-```bash
-createdb gitlab_dashboard
-```
+4. **Install and Run Frontend** (in a new terminal)
+   ```bash
+   cd dashboard
+   npm install
+   npm run dev
+   ```
 
-#### 2. Setup Backend
+5. **Access Dashboard**
+   - Open http://localhost:5173
+
+### First-Time Configuration
+
+When you open the dashboard:
+
+1. Enter your **GitLab URL** (default: `https://gitlab.com`)
+2. Enter your **Private Token** ([How to create one](./docs/SETUP.md#gitlab-personal-access-token))
+3. Optionally specify **Group ID** or **Project ID**
+4. Click **Connect to GitLab**
+
+The dashboard will sync data from GitLab and display your analytics!
+
+## 📚 Documentation
+
+Comprehensive documentation is available in the [`docs/`](./docs/) folder:
+
+- **[Setup Guide](./docs/SETUP.md)** - Detailed installation and configuration instructions
+- **[Architecture](./docs/ARCHITECTURE.md)** - System design and technical details
+- **[API Documentation](./docs/API.md)** - Complete REST API reference
+- **[Troubleshooting](./docs/TROUBLESHOOTING.md)** - Common issues and solutions
+- **[Contributing Guide](./CONTRIBUTING.md)** - How to contribute to the project
+
+## 🧪 Running Tests
+
+We have comprehensive test suites for both backend and frontend to ensure code quality.
+
+### Backend Tests
 
 ```bash
 cd backend
-npm install
-cp ../.env.example .env
-# Edit .env with your PostgreSQL credentials
-npm run dev
+
+# Run tests once
+npm test
+
+# Run tests in watch mode
+npm run test:watch
+
+# Run tests with coverage
+npm run test:coverage
+
+# Run tests with UI
+npm run test:ui
 ```
 
-The backend will run on http://localhost:3001
-
-#### 3. Setup Frontend
+### Frontend Tests
 
 ```bash
 cd dashboard
-npm install
-npm run dev
+
+# Run tests once
+npm test
+
+# Run tests in watch mode
+npm run test:watch
+
+# Run tests with coverage
+npm run test:coverage
+
+# Run tests with UI
+npm run test:ui
 ```
 
-The frontend will run on http://localhost:5173
+### All Tests
 
-## Configuration
+Run all tests from the project root:
 
-### Environment Variables
+```bash
+# Backend tests
+(cd backend && npm test)
 
-The application uses environment variables for configuration. Copy `.env.example` to `.env` and customize:
-
-**Backend (.env):**
-```
-DB_HOST=localhost           # PostgreSQL host
-DB_PORT=5432               # PostgreSQL port
-DB_NAME=gitlab_dashboard   # Database name
-DB_USER=postgres           # Database user
-DB_PASSWORD=postgres       # Database password
-PORT=3001                  # Backend API port
+# Frontend tests
+(cd dashboard && npm test)
 ```
 
-**Frontend (.env or dashboard/.env):**
-```
-VITE_API_URL=http://localhost:3001  # Backend API URL
-```
+**Test Coverage**: Our test suite covers:
+- ✅ GitLab API integration
+- ✅ Database operations
+- ✅ API endpoints
+- ✅ React components
+- ✅ Service layer logic
+- ✅ Date and statistics calculations
 
-### GitLab Configuration
-
-When you open the dashboard, you'll be prompted to enter:
-
-1. **GitLab URL**: Your GitLab instance URL (default: `https://gitlab.com`)
-2. **Private Token**: Generate from GitLab → Settings → Access Tokens with `read_api` scope
-3. **Group ID** (optional): Specify a group to analyze group members
-4. **Project ID** (optional): Specify a project to analyze a specific repository
-
-## Technology Stack
+## 🛠 Technology Stack
 
 ### Backend
 - **Node.js** with Express for REST API
 - **PostgreSQL** for persistent data storage
 - **TypeScript** for type safety
 - **pg** (node-postgres) for database connectivity
+- **Vitest** for testing
 
 ### Frontend
 - **React 19** with TypeScript
@@ -151,35 +212,88 @@ When you open the dashboard, you'll be prompted to enter:
 - **chartjs-plugin-zoom** for zoom/pan functionality
 - **date-fns** for date manipulation
 - **Axios** for API requests
+- **Vitest** + React Testing Library for testing
 
-## Architecture
+## 📊 Architecture
 
 The application follows a three-tier architecture:
+
+```
+┌─────────────┐      HTTP/REST      ┌─────────────┐      SQL       ┌──────────────┐
+│   React     │ ◄──────────────────► │   Express   │ ◄─────────────►│  PostgreSQL  │
+│  Dashboard  │                      │   Backend   │                │   Database   │
+└─────────────┘                      └─────────────┘                └──────────────┘
+```
 
 1. **Frontend (React)**: User interface for visualizing GitLab data
 2. **Backend (Express API)**: REST API for data synchronization and retrieval
 3. **Database (PostgreSQL)**: Persistent storage for all GitLab data
 
-### Data Flow
+See [Architecture Documentation](./docs/ARCHITECTURE.md) for detailed information.
 
-1. User configures GitLab credentials in the frontend
-2. Frontend sends sync request to backend API
-3. Backend fetches data from GitLab API and stores it in PostgreSQL
-4. Frontend queries backend API for dashboard statistics
-5. Backend retrieves and aggregates data from PostgreSQL
-6. Frontend displays the data in interactive charts and tables
+## 🤝 Contributing
 
-### Database Schema
+We welcome contributions! Here's how you can help:
 
-The PostgreSQL database contains four main tables:
+1. **Report bugs**: [Create an issue](https://github.com/Re4zOon/github-committer-report/issues/new) with details
+2. **Suggest features**: Share your ideas for improvements
+3. **Submit PRs**: Fix bugs or add features
 
-- **users**: GitLab users information
-- **events**: User events (pushes, commits, etc.)
-- **commits**: Detailed commit information with stats
-- **projects**: GitLab projects/repositories
+Please read our [Contributing Guide](./CONTRIBUTING.md) for details on:
+- Setting up the development environment
+- Coding standards and best practices
+- Testing requirements
+- Submitting pull requests
 
-All tables are indexed for optimal query performance.
+### Quick Contribution Steps
 
-## License
+```bash
+# Fork and clone the repository
+git clone https://github.com/YOUR_USERNAME/github-committer-report.git
+cd github-committer-report
+
+# Create a feature branch
+git checkout -b feature/amazing-feature
+
+# Make your changes and test
+cd backend && npm test
+cd ../dashboard && npm test
+
+# Commit and push
+git commit -m "feat: add amazing feature"
+git push origin feature/amazing-feature
+
+# Open a Pull Request on GitHub
+```
+
+## 📝 License
 
 MIT
+
+## 🙏 Acknowledgments
+
+- Built with [React](https://react.dev/) and [Express](https://expressjs.com/)
+- Charts powered by [Chart.js](https://www.chartjs.org/)
+- Database powered by [PostgreSQL](https://www.postgresql.org/)
+
+## 📞 Support
+
+- **Documentation**: Check the [`docs/`](./docs/) folder
+- **Issues**: [GitHub Issues](https://github.com/Re4zOon/github-committer-report/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/Re4zOon/github-committer-report/discussions)
+
+## 🗺️ Roadmap
+
+Future enhancements we're considering:
+
+- [ ] Real-time updates via WebSockets
+- [ ] Multi-user support with authentication
+- [ ] Custom dashboard widgets
+- [ ] Email report scheduling
+- [ ] CSV/PDF export functionality
+- [ ] Advanced analytics with ML insights
+- [ ] Mobile app
+
+---
+
+**Made with ❤️ by the community**
