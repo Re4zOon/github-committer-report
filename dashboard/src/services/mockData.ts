@@ -1,4 +1,4 @@
-import type { DashboardStats, UserActivity, GitLabUser } from '../types/gitlab';
+import type { DashboardStats, UserActivity, GitLabUser, GitLabEvent } from '../types/gitlab';
 
 // Generate mock data for demonstration purposes
 export function generateMockData(): { stats: DashboardStats; activities: UserActivity[] } {
@@ -12,6 +12,8 @@ export function generateMockData(): { stats: DashboardStats; activities: UserAct
     { id: 7, username: 'edward.chen', name: 'Edward Chen', state: 'active', avatar_url: 'https://www.gravatar.com/avatar/7?d=identicon', web_url: '' },
     { id: 8, username: 'fiona.garcia', name: 'Fiona Garcia', state: 'active', avatar_url: 'https://www.gravatar.com/avatar/8?d=identicon', web_url: '' },
   ];
+
+  const projects = ['frontend-app', 'backend-api', 'mobile-app', 'infrastructure', 'documentation', 'shared-libs'];
 
   // Generate commits by day for the last 30 days
   const commitsByDay: { [date: string]: number } = {};
@@ -84,14 +86,62 @@ export function generateMockData(): { stats: DashboardStats; activities: UserAct
     projectBreakdown,
   };
 
-  const activities: UserActivity[] = mockUsers.map(user => ({
-    user,
-    events: [],
-    commits: [],
-    totalCommits: topContributors.find(c => c.user.id === user.id)?.commits || 0,
-    totalAdditions: Math.floor(Math.random() * 2000),
-    totalDeletions: Math.floor(Math.random() * 1000),
-  }));
+  // Generate mock events for each user to enable proper filtering
+  const activities: UserActivity[] = mockUsers.map(user => {
+    const userCommitCount = topContributors.find(c => c.user.id === user.id)?.commits || 0;
+    const events: GitLabEvent[] = [];
+    
+    // Generate push events distributed over the last 30 days
+    const eventsToGenerate = Math.max(1, Math.floor(userCommitCount / 3)); // ~3 commits per push event
+    for (let i = 0; i < eventsToGenerate; i++) {
+      const daysAgo = Math.floor(Math.random() * 30);
+      const date = new Date(now);
+      date.setDate(date.getDate() - daysAgo);
+      
+      // Set a random hour (more during business hours)
+      const hour = Math.random() < 0.7 
+        ? Math.floor(Math.random() * 9) + 9  // 9 AM - 5 PM
+        : Math.floor(Math.random() * 24);     // any hour
+      date.setHours(hour, Math.floor(Math.random() * 60), 0, 0);
+      
+      const commitCount = Math.floor(Math.random() * 5) + 1;
+      const projectIndex = Math.floor(Math.random() * projects.length);
+      
+      events.push({
+        id: i + user.id * 1000,
+        project_id: projectIndex + 1,
+        action_name: 'pushed to',
+        target_id: projectIndex + 1,
+        target_type: 'Project',
+        author_id: user.id,
+        target_title: projects[projectIndex],
+        created_at: date.toISOString(),
+        author: {
+          id: user.id,
+          username: user.username,
+          name: user.name,
+          avatar_url: user.avatar_url,
+        },
+        push_data: {
+          commit_count: commitCount,
+          action: 'pushed',
+          ref_type: 'branch',
+          commit_from: null,
+          commit_to: null,
+          ref: 'main',
+        },
+      });
+    }
+    
+    return {
+      user,
+      events,
+      commits: [],
+      totalCommits: userCommitCount,
+      totalAdditions: Math.floor(Math.random() * 2000),
+      totalDeletions: Math.floor(Math.random() * 1000),
+    };
+  });
 
   return { stats, activities };
 }

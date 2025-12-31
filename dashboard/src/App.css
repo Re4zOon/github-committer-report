@@ -68,6 +68,13 @@ body {
   margin-bottom: 1rem;
 }
 
+.header-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+}
+
 .disconnect-btn {
   background: transparent;
   border: 1px solid var(--danger-color);

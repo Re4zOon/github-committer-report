@@ -5,3 +5,4 @@ export { ActivityHeatmap } from './ActivityHeatmap';
 export { ProjectBreakdown } from './ProjectBreakdown';
 export { ConfigForm } from './ConfigForm';
 export { DateRangePicker } from './DateRangePicker';
+export { UserFilter } from './UserFilter';
