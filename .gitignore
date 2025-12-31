@@ -6,6 +6,10 @@ dist/
 dist-ssr/
 *.local
 
+# Backend build
+backend/dist/
+backend/node_modules/
+
 # Logs
 logs/
 *.log
@@ -32,3 +36,7 @@ pnpm-debug.log*
 
 # Coverage
 coverage/
+
+# Database
+*.db
+*.sqlite
