@@ -67,8 +67,6 @@ Try the live demo mode to explore the dashboard without configuring GitLab:
 
 ## 🚀 Quick Start
 
-## 🚀 Quick Start
-
 ### Option 1: Docker (Recommended)
 
 The fastest way to get started. This will set up PostgreSQL, backend, and frontend automatically.
@@ -197,8 +195,6 @@ Run all tests from the project root:
 - ✅ React components
 - ✅ Service layer logic
 - ✅ Date and statistics calculations
-
-## 🛠 Technology Stack
 
 ## 🛠 Technology Stack
 
