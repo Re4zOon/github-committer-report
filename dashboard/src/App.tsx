@@ -11,6 +11,7 @@ import {
   DateRangePicker,
 } from './components';
 import { GitLabService } from './services/gitlabService';
+import backendApiService from './services/backendApi.service';
 import { generateMockData } from './services/mockData';
 import type { GitLabConfig, DashboardStats, UserActivity } from './types/gitlab';
 
@@ -18,7 +19,7 @@ function App() {
   const [isConfigured, setIsConfigured] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [gitlabService, setGitlabService] = useState<GitLabService | null>(null);
+  const [gitlabConfig, setGitlabConfig] = useState<GitLabConfig | null>(null);
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [activities, setActivities] = useState<UserActivity[]>([]);
   const [isDemo, setIsDemo] = useState(false);
@@ -28,17 +29,20 @@ function App() {
   });
 
   const fetchData = useCallback(
-    async (service: GitLabService, since: Date, until: Date) => {
+    async (config: GitLabConfig, since: Date, until: Date) => {
       setIsLoading(true);
       setError(null);
       try {
-        const users = await service.getActiveUsers();
-        const userActivities = await service.collectUserActivities(users, since, until);
-        const dashboardStats = service.calculateStats(userActivities, since, until);
+        // Sync data from GitLab to backend database
+        await backendApiService.syncData(config, since, until);
+        
+        // Fetch data from backend database
+        const userActivities = await backendApiService.getUserActivities(since, until);
+        const dashboardStats = await backendApiService.getStats(since, until);
         setActivities(userActivities);
         setStats(dashboardStats);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to fetch data from GitLab');
+        setError(err instanceof Error ? err.message : 'Failed to fetch data from backend');
         console.error('Error fetching data:', err);
       } finally {
         setIsLoading(false);
@@ -48,11 +52,10 @@ function App() {
   );
 
   const handleConfigSubmit = async (config: GitLabConfig) => {
-    const service = new GitLabService(config);
-    setGitlabService(service);
+    setGitlabConfig(config);
     setIsConfigured(true);
     setIsDemo(false);
-    await fetchData(service, dateRange.since, dateRange.until);
+    await fetchData(config, dateRange.since, dateRange.until);
   };
 
   const handleDemoMode = () => {
@@ -70,14 +73,27 @@ function App() {
       const { stats: mockStats, activities: mockActivities } = generateMockData();
       setStats(mockStats);
       setActivities(mockActivities);
-    } else if (gitlabService) {
-      await fetchData(gitlabService, since, until);
+    } else if (gitlabConfig) {
+      // Fetch data from backend database for the new date range
+      setIsLoading(true);
+      setError(null);
+      try {
+        const userActivities = await backendApiService.getUserActivities(since, until);
+        const dashboardStats = await backendApiService.getStats(since, until);
+        setActivities(userActivities);
+        setStats(dashboardStats);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to fetch data from backend');
+        console.error('Error fetching data:', err);
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
   const handleDisconnect = () => {
     setIsConfigured(false);
-    setGitlabService(null);
+    setGitlabConfig(null);
     setStats(null);
     setActivities([]);
     setError(null);
